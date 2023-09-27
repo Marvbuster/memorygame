@@ -3,25 +3,33 @@ import "./MemoryGame.scss";
 import MemoryItem from "./MemoryItem";
 import gsap, { Quad, Quart } from "gsap";
 
-const TRANSITION_TIME_CARDFLIP = 1;
+const TRANSITION_TIME_CARDFLIP = 0.3;
+let _activeTiles = 0;
 let _valueTiles = [];
 let _allTiles = [];
+let _splash, _curtain;
 
 const MemoryGame = (props) => {
   useEffect(() => {
     _allTiles = Array.from(memory.current.querySelectorAll(".memory-item"));
+    _splash = memory.current.querySelector(".splash");
+    _curtain = memory.current.querySelector(".game-curtain");
   });
 
   const memory = useRef(null);
-  const soundTick = new Audio('./sounds/tick.mp3');
-  const soundClick = new Audio('./sounds/click.mp3');
-  const soundMatch = new Audio('./sounds/jig_match.mp3');
-  const soundNomatch = new Audio('./sounds/jig_nomatch.mp3');
-  soundTick.volume = 0.3;
+  const soundTick = new Audio("./sounds/tick.mp3");
+  const soundClick = new Audio("./sounds/click.mp3");
+  const soundMatch = new Audio("./sounds/jig_match.mp3");
+  const soundNomatch = new Audio("./sounds/jig_nomatch.mp3");
+  const soundBgMusic = new Audio("./sounds/fis_theme.mp3");
+  soundTick.volume = 0.1;
   soundClick.volume = 0.3;
   soundMatch.volume = 0.3;
   soundNomatch.volume = 0.3;
+  soundBgMusic.volume = 0.08;
+  soundBgMusic.loop = true;
 
+  // const curtain = memory.current.querySelector('> .curtain');
   // console.log(memory.current);
   // _allTiles = Array.from(memory.current.querySelectorAll(".memory-item"));
 
@@ -33,13 +41,19 @@ const MemoryGame = (props) => {
   const onClick = (e) => {
     if (e.target.dataset.animating) return;
     flipTween(e.target, !e.target.dataset.open ? true : false);
-    lock();
     soundClick.play();
+    _activeTiles++;
+    if (_activeTiles >= 2) {
+      lock();
+      _activeTiles = 0;
+    }
   };
-  const onOver = (e) => {soundTick.play(0.4)};
+  const onOver = (e) => {
+    soundTick.play(0.4);
+  };
   const onOut = (e) => {};
 
-  const flipTween = (target, open = false) => {
+  const flipTween = (target, open = false, unlockAfter = false) => {
     if (open) target.dataset.open = true;
 
     target.dataset.animating = true;
@@ -62,9 +76,12 @@ const MemoryGame = (props) => {
             setTimeout(() => {
               if (open) {
                 addTile(target);
-              } else delete target.dataset.open;
+              } else {
+                delete target.dataset.open;
+              }
               delete target.dataset.animating;
-              if(_valueTiles.length === 1) target.dataset.locked = true;
+              if (_valueTiles.length === 1) target.dataset.locked = true;
+              if (unlockAfter) unlock();
             }, 500);
           },
         });
@@ -78,13 +95,13 @@ const MemoryGame = (props) => {
       if (_valueTiles[0].dataset.value === _valueTiles[1].dataset.value) {
         disable(_valueTiles);
         soundMatch.play();
+        unlock();
       } else {
-        _valueTiles.forEach((tile) => flipTween(tile));
+        _valueTiles.forEach((tile) => flipTween(tile, false, true));
         soundNomatch.play();
       }
       _valueTiles = [];
     }
-    unlock();
   };
 
   const disable = (tiles) => {
@@ -99,18 +116,32 @@ const MemoryGame = (props) => {
     _allTiles.forEach((tile) => delete tile.dataset.locked);
   };
 
+  const startMemory = () => {
+    soundClick.play();
+    soundBgMusic.play();
+    _splash.classList.remove("visible");
+    _curtain.classList.remove("active");
+  };
+
   // const tilesByValue = (searchValue) => {
   //   return _tiles.filter((tile) => tile.dataset.value === searchValue)
   // }
 
   return (
     <div className={`memory-game colorset-${props.colorSet}`} ref={memory}>
+      <div className="shadow"></div>
       <div className="aspect-ratio-box">
         <ul className="grid" style={{ gridTemplateColumns: templateColumnsString }}>
           {props.config.items.map((item, index) => (
             <MemoryItem key={item.id} uid={item.id} onClick={onClick} onMouseOver={onOver} onMouseOut={onOut} config={item} />
           ))}
         </ul>
+      </div>
+      <div className="game-curtain active"></div>
+      <div className="splash visible">
+        <h1>Moin!</h1>
+        <p>Lust auf eine Runde Memory?</p>
+        <button onClick={startMemory}>Starten</button>
       </div>
     </div>
   );
