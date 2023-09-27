@@ -29,10 +29,6 @@ const MemoryGame = (props) => {
   soundBgMusic.volume = 0.08;
   soundBgMusic.loop = true;
 
-  // const curtain = memory.current.querySelector('> .curtain');
-  // console.log(memory.current);
-  // _allTiles = Array.from(memory.current.querySelectorAll(".memory-item"));
-
   let templateColumnsString = "";
   for (let i = 0; i < props.config.width; i++) {
     templateColumnsString += "1fr ";
@@ -122,10 +118,6 @@ const MemoryGame = (props) => {
     _splash.classList.remove("visible");
     _curtain.classList.remove("active");
   };
-
-  // const tilesByValue = (searchValue) => {
-  //   return _tiles.filter((tile) => tile.dataset.value === searchValue)
-  // }
 
   return (
     <div className={`memory-game colorset-${props.colorSet}`} ref={memory}>
