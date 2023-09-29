@@ -50,6 +50,8 @@
     transform-style: preserve-3d;
 
     &--front,
+    &--left,
+    &--right,
     &--back {
       position: absolute;
       display: flex;
@@ -66,8 +68,36 @@
       user-select: none;
     }
 
+    &--front {
+      transform: translateZ(5px);
+    }
+
     &--back {
-      transform: rotateY(180deg);
+      transform: rotateY(180deg) translateZ(5px);
+    }
+
+    &--left {
+      transform: translateX(-5px) rotateY(90deg);
+      width: 10px !important;
+      backface-visibility: visible;
+      background-color: #7b28c5;
+      padding: 0;
+
+      .curtain {
+        opacity: 0.5;
+      }
+    }
+
+    &--right {
+      transform: translateX(113px) rotateY(90deg);
+      width: 10px !important;
+      backface-visibility: hidden;
+      background-color: #7b28c5;
+      padding: 0;
+
+      .curtain {
+        opacity: 0.5;
+      }
     }
 
     img {

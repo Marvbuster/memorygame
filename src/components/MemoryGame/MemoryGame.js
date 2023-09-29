@@ -1,20 +1,37 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./MemoryGame.scss";
 import MemoryItem from "./MemoryItem";
 import gsap, { Quad, Quart } from "gsap";
 
-const TRANSITION_TIME_CARDFLIP = 0.3;
+const TRANSITION_TIME_CARDFLIP = 1;
+const TRANSITION_TIME_CARDFLIP_BACK = 0.6;
+let AUDIOMUTE = false;
+let WIN_CONDITION = -1;
 let _activeTiles = 0;
 let _valueTiles = [];
 let _allTiles = [];
-let _splash, _curtain;
+let _splash, _curtain, _muteButton, _counter;
 
 const MemoryGame = (props) => {
+  const [itemsArray, setItemsArray] = useState(props.config.items);
+
   useEffect(() => {
     _allTiles = Array.from(memory.current.querySelectorAll(".memory-item"));
     _splash = memory.current.querySelector(".splash");
     _curtain = memory.current.querySelector(".game-curtain");
-  });
+    _muteButton = memory.current.querySelector(".game-controls .mute");
+    WIN_CONDITION = _allTiles.length / 2;
+    initGame();
+  }, []);
+
+  const initGame = () => {
+    _counter = {
+      user: 0,
+      matches: 0,
+    };
+    shuffle(itemsArray);
+  }
+
 
   const memory = useRef(null);
   const soundTick = new Audio("./sounds/tick.mp3");
@@ -22,12 +39,15 @@ const MemoryGame = (props) => {
   const soundMatch = new Audio("./sounds/jig_match.mp3");
   const soundNomatch = new Audio("./sounds/jig_nomatch.mp3");
   const soundBgMusic = new Audio("./sounds/fis_theme.mp3");
+  const soundWin = new Audio("./sounds/win.mp3");
   soundTick.volume = 0.1;
   soundClick.volume = 0.3;
   soundMatch.volume = 0.3;
   soundNomatch.volume = 0.3;
-  soundBgMusic.volume = 0.08;
+  soundBgMusic.volume = 0;
   soundBgMusic.loop = true;
+  soundWin.volume = 0.4;
+
 
   let templateColumnsString = "";
   for (let i = 0; i < props.config.width; i++) {
@@ -37,7 +57,7 @@ const MemoryGame = (props) => {
   const onClick = (e) => {
     if (e.target.dataset.animating) return;
     flipTween(e.target, !e.target.dataset.open ? true : false);
-    soundClick.play();
+    if (!AUDIOMUTE) soundClick.play();
     _activeTiles++;
     if (_activeTiles >= 2) {
       lock();
@@ -45,7 +65,7 @@ const MemoryGame = (props) => {
     }
   };
   const onOver = (e) => {
-    soundTick.play(0.4);
+    if (!AUDIOMUTE) soundTick.play(0.4);
   };
   const onOut = (e) => {};
 
@@ -53,21 +73,37 @@ const MemoryGame = (props) => {
     if (open) target.dataset.open = true;
 
     target.dataset.animating = true;
-    gsap.set(target, { perspective: 1000 });
+    gsap.set(target, { perspective: 1500 });
 
+    let time = open ? TRANSITION_TIME_CARDFLIP / 2 : TRANSITION_TIME_CARDFLIP_BACK / 2;
     let content = target.querySelector(".content");
-    let curtain = content.querySelector(".curtain");
-    gsap.to(content, { rotationY: 90, duration: TRANSITION_TIME_CARDFLIP / 2, ease: Quad.easeIn });
-    gsap.to(curtain, {
+    let curtainFrontBack = content.querySelectorAll(".content--front .curtain, .content--back .curtain");
+    let curtainLeftRight = content.querySelectorAll(".content--left .curtain, .content--right .curtain");
+
+    // flip fore
+    gsap.to(content, { rotationY: 90, duration: time, ease: Quad.easeIn });
+    gsap.to(curtainLeftRight, {
+      opacity: 0,
+      duration: time,
+      ease: Quad.easeIn,
+    });
+    gsap.to(curtainFrontBack, {
       opacity: 0.8,
-      duration: TRANSITION_TIME_CARDFLIP / 2,
+      duration: time,
       ease: Quart.easeIn,
+      // flip back
       onComplete: () => {
-        gsap.to(content, { rotationY: open ? 180 : 0, duration: TRANSITION_TIME_CARDFLIP, ease: Quad.easeOut });
-        gsap.to(curtain, {
+        gsap.to(content, { rotationY: open ? 180 : 0, duration: time, ease: Quad.easeOut });
+        gsap.to(curtainLeftRight, {
+          opacity: 0.5,
+          duration: time,
+          ease: Quad.easeOut,
+        });
+        gsap.to(curtainFrontBack, {
           opacity: 0,
-          duration: TRANSITION_TIME_CARDFLIP / 2,
+          duration: time,
           ease: Quart.easeOut,
+          // adding tile to check for match and reset animation
           onComplete: () => {
             setTimeout(() => {
               if (open) {
@@ -77,7 +113,9 @@ const MemoryGame = (props) => {
               }
               delete target.dataset.animating;
               if (_valueTiles.length === 1) target.dataset.locked = true;
-              if (unlockAfter) unlock();
+              if (unlockAfter) {
+                delete target.dataset.locked;
+              }
             }, 500);
           },
         });
@@ -85,18 +123,46 @@ const MemoryGame = (props) => {
     });
   };
 
+  const winMatch = () => {
+    soundWin.play();
+    refillSplash("win");
+  };
+
+  const refillSplash = (type) => {
+    switch (type) {
+      case "win":
+        _splash.querySelector("h1").innerHTML = "Juhu!";
+        _splash.querySelector("p").innerHTML = "Du hast gewonnen!!";
+        _splash.querySelector("button").innerHTML = "Nochmal";
+        _splash.classList.add("visible");
+        _curtain.classList.add("active");
+        _splash.dataset.replay = true;
+        break;
+
+      default:
+        break;
+    }
+  };
+
   const addTile = (tile) => {
     _valueTiles.push(tile);
     if (_valueTiles.length > 1) {
+      // matching tiles
       if (_valueTiles[0].dataset.value === _valueTiles[1].dataset.value) {
+        _counter.matches++;
         disable(_valueTiles);
-        soundMatch.play();
+        if (_counter.matches >= WIN_CONDITION) {
+          winMatch();
+        } else if (!AUDIOMUTE) soundMatch.play();
         unlock();
       } else {
+        // not matching tiles
+        unlock(_valueTiles);
         _valueTiles.forEach((tile) => flipTween(tile, false, true));
-        soundNomatch.play();
+        if (!AUDIOMUTE) soundNomatch.play();
       }
       _valueTiles = [];
+      _counter.user++;
     }
   };
 
@@ -108,33 +174,87 @@ const MemoryGame = (props) => {
     _allTiles.forEach((tile) => (tile.dataset.locked = true));
   };
 
-  const unlock = (tiles) => {
-    _allTiles.forEach((tile) => delete tile.dataset.locked);
+  const unlock = (exceptionTiles) => {
+    if (exceptionTiles)
+      _allTiles.forEach((tile) => {
+        if (tile !== exceptionTiles[0] && tile !== exceptionTiles[1]) delete tile.dataset.locked;
+      });
+    else _allTiles.forEach((tile) => delete tile.dataset.locked);
   };
 
   const startMemory = () => {
-    soundClick.play();
-    soundBgMusic.play();
+    if (_splash.dataset.replay) {
+      _counter.user = 0;
+      _counter.matches = 0;
+      _allTiles.forEach((tile) => {
+        delete tile.dataset.disabled;
+        flipTween(tile, false, true)
+      }); 
+      shuffle(itemsArray);
+    }
+    if (!AUDIOMUTE) soundClick.play();
+    if (!AUDIOMUTE) soundBgMusic.play();
+    if (!AUDIOMUTE) gsap.to(soundBgMusic, { volume: 0.08, duration: 6 });
     _splash.classList.remove("visible");
     _curtain.classList.remove("active");
   };
+
+  const toggleMute = () => {
+    soundClick.play();
+    if (!AUDIOMUTE) {
+      AUDIOMUTE = true;
+      gsap.to(soundBgMusic, { volume: 0, duration: 2, overwrite: true });
+      _muteButton.classList.add("muted");
+    } else {
+      AUDIOMUTE = false;
+      soundBgMusic.play();
+      gsap.to(soundBgMusic, { volume: 0.08, duration: 6, overwrite: true });
+      _muteButton.classList.remove("muted");
+    }
+  };
+
+  function shuffle(a) {
+    let b = [...a];
+
+    for (let i = b.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [b[i], b[j]] = [b[j], b[i]];
+    }
+
+    setItemsArray(b);
+  }
 
   return (
     <div className={`memory-game colorset-${props.colorSet}`} ref={memory}>
       <div className="shadow"></div>
       <div className="aspect-ratio-box">
         <ul className="grid" style={{ gridTemplateColumns: templateColumnsString }}>
-          {props.config.items.map((item, index) => (
+          {itemsArray.map((item, index) => (
             <MemoryItem key={item.id} uid={item.id} onClick={onClick} onMouseOver={onOver} onMouseOut={onOut} config={item} />
           ))}
         </ul>
+        <div className="splash visible">
+          <h1>Moin!</h1>
+          <p>Lust auf eine Runde Memory?</p>
+          <button onClick={startMemory}>Starten</button>
+        </div>
+      </div>
+      <div className="game-controls">
+        <div className="mute" onClick={toggleMute}>
+          <svg id="volume" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 576 512">
+            <path d="M301.1 34.8C312.6 40 320 51.4 320 64V448c0 12.6-7.4 24-18.9 29.2s-25 3.1-34.4-5.3L131.8 352H64c-35.3 0-64-28.7-64-64V224c0-35.3 28.7-64 64-64h67.8L266.7 40.1c9.4-8.4 22.9-10.4 34.4-5.3z" />
+            <path
+              id="x"
+              d="M425 167l55 55 55-55c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-55 55 55 55c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-55-55-55 55c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l55-55-55-55c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0z"
+            />
+          </svg>
+        </div>
+        <div className="volume"></div>
+      </div>
+      <div className="game-info">
+        <div className="score">Versuche:</div>
       </div>
       <div className="game-curtain active"></div>
-      <div className="splash visible">
-        <h1>Moin!</h1>
-        <p>Lust auf eine Runde Memory?</p>
-        <button onClick={startMemory}>Starten</button>
-      </div>
     </div>
   );
 };
