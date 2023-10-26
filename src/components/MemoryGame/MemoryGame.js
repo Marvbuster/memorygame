@@ -11,16 +11,35 @@ let _activeTiles = 0;
 let _valueTiles = [];
 let _allTiles = [];
 let _splash, _curtain, _muteButton, _counter;
+let soundTick, soundClick, soundMatch, soundNomatch, soundBgMusic, soundWin;
 
 const MemoryGame = (props) => {
   const [itemsArray, setItemsArray] = useState(props.config.items);
+  
 
   useEffect(() => {
+
     _allTiles = Array.from(memory.current.querySelectorAll(".memory-item"));
     _splash = memory.current.querySelector(".splash");
     _curtain = memory.current.querySelector(".game-curtain");
     _muteButton = memory.current.querySelector(".game-controls .mute");
     WIN_CONDITION = _allTiles.length / 2;
+
+    soundTick = new Audio("./sounds/tick.mp3");
+    soundClick = new Audio("./sounds/click.mp3");
+    soundMatch = new Audio("./sounds/jig_match.mp3");
+    soundNomatch = new Audio("./sounds/jig_nomatch.mp3");
+    soundBgMusic = new Audio("./sounds/fis_theme.mp3");
+    soundWin = new Audio("./sounds/win.mp3");
+    // 
+    soundTick.volume = 0.1;
+    soundClick.volume = 0.3;
+    soundMatch.volume = 0.3;
+    soundNomatch.volume = 0.3;
+    soundBgMusic.volume = 0;
+    soundBgMusic.loop = true;
+    soundWin.volume = 0.4;
+
     initGame();
   }, []);
 
@@ -34,19 +53,7 @@ const MemoryGame = (props) => {
 
 
   const memory = useRef(null);
-  const soundTick = new Audio("./sounds/tick.mp3");
-  const soundClick = new Audio("./sounds/click.mp3");
-  const soundMatch = new Audio("./sounds/jig_match.mp3");
-  const soundNomatch = new Audio("./sounds/jig_nomatch.mp3");
-  const soundBgMusic = new Audio("./sounds/fis_theme.mp3");
-  const soundWin = new Audio("./sounds/win.mp3");
-  soundTick.volume = 0.1;
-  soundClick.volume = 0.3;
-  soundMatch.volume = 0.3;
-  soundNomatch.volume = 0.3;
-  soundBgMusic.volume = 0;
-  soundBgMusic.loop = true;
-  soundWin.volume = 0.4;
+
 
 
   let templateColumnsString = "";
@@ -181,6 +188,10 @@ const MemoryGame = (props) => {
       });
     else _allTiles.forEach((tile) => delete tile.dataset.locked);
   };
+
+  const test = () => {
+    
+  }
 
   const startMemory = () => {
     if (_splash.dataset.replay) {
