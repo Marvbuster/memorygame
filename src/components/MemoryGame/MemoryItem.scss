@@ -64,7 +64,8 @@
 	  height:                      100%;
 	  -webkit-backface-visibility: hidden; /* Safari */
 	  backface-visibility:         hidden;
-	  background-color:            #7b28c5;
+      transition: 				   background-color 3s;
+	  background-color:            var(--colorPrimary);
 	  color:                       white;
 	  user-select:                 none;
 	}
@@ -81,7 +82,7 @@
 	  transform:           translateX(-5px) rotateY(90deg);
 	  width:               10px !important;
 	  backface-visibility: visible;
-	  background-color:    #7b28c5;
+	  background-color:    var(--colorPrimary);
 	  padding:             0;
 
 	  .curtain {
@@ -93,7 +94,7 @@
 	  transform:           translateX(113px) rotateY(90deg);
 	  width:               10px !important;
 	  backface-visibility: hidden;
-	  background-color:    #7b28c5;
+	  background-color:    var(--colorPrimary);
 	  padding:             0;
 
 	  .curtain {
@@ -110,7 +111,8 @@
 	}
 
 	svg {
-	  fill:   #c995f6;
+		transition: fill 3s;
+	  fill:   var(--colorPrimaryLight);
 	  //filter: drop-shadow(0px 0px 10px rgba(0, 0, 0, 0.2));
 	}
   }

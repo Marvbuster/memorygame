@@ -1,10 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap");
 
 .memory-game {
-  --colorPrimary: #7b28c5;
-  --colorPrimaryLight: #c995f6;
-  --colorPrimaryDark: #451c69;
-
   font-family: "Nanum Pen Script", Roboto;
   margin-top: -100px;
 
@@ -176,6 +172,9 @@
 :root {
   --homegradient-color1: rgba(123, 40, 197, 1);
   --homegradient-color2: rgba(69, 28, 105, 1);
+  --colorPrimary: #7b28c5;
+  --colorPrimaryLight: #c995f6;
+  --colorPrimaryDark: #451c69;
 }
 
 #root {
@@ -188,38 +187,64 @@
                     radial-gradient(
                                     ellipse at -20% -10%,
                                     rgba(65, 60, 50, 1) 0%,
-                                    var(--homegradient-color1) 60%,
+                                    var(--homegradient-color1) 40%,
                                     var(--homegradient-color2) 100%
                     );
 
   &.colorset-0 {
     --homegradient-color1: rgba(123, 40, 197, 1);
     --homegradient-color2: rgba(69, 28, 105, 1);
+
+    --colorPrimary: #7b28c5;
+    --colorPrimaryLight: #c995f6;
+    --colorPrimaryDark: #451c69;
   }
 
   &.colorset-1 {
     --homegradient-color1: rgba(185, 112, 30, 1);
     --homegradient-color2: rgba(173, 98, 24, 1);
+
+    --colorPrimary: rgb(185, 112, 30);
+    --colorPrimaryLight: rgb(233, 178, 54);
+    --colorPrimaryDark: rgb(143, 68, 24);
   }
 
   &.colorset-2 {
     --homegradient-color1: rgba(90, 120, 230, 1);
     --homegradient-color2: rgba(80, 104, 201, 1);
+
+    --colorPrimary: rgb(90, 120, 230);
+    --colorPrimaryLight: rgb(140, 150, 255);
+    --colorPrimaryDark: rgb(50, 60, 180);
   }
 
   &.colorset-3 {
     --homegradient-color1: rgba(20, 111, 86, 1);
     --homegradient-color2: rgba(20, 92, 55, 1);
+
+    --colorPrimary: rgb(20, 111, 86);
+    --colorPrimaryLight: rgb(60, 181, 136);
+    --colorPrimaryDark: rgb(0, 91, 66);
+
   }
 
 
   &.colorset-4 {
     --homegradient-color1: rgba(171, 51, 16, 1);
     --homegradient-color2: rgba(160, 22, 36, 1);
+
+    --colorPrimary: rgb(171, 51, 16);
+    --colorPrimaryLight: rgb(241, 121, 76);
+    --colorPrimaryDark: rgb(101, 1, 16);
   }
 
   &.colorset-5 {
     --homegradient-color1: rgba(40, 160, 135, 1);
     --homegradient-color2: rgba(31, 141, 119, 1);
+
+    --colorPrimary: rgb(40, 160, 135);
+    --colorPrimaryLight: rgb(90, 220, 185);
+    --colorPrimaryDark: rgb(10, 70, 25);
+
   }
 }
