@@ -13,9 +13,14 @@ let _allTiles = [];
 let _splash, _curtain, _muteButton, _counter;
 let soundTick, soundClick, soundMatch, soundNomatch, soundBgMusic, soundWin;
 
+// Funktion zur Generierung einer zufälligen Zahl für die Klasse
+const getRandomColorSet = () => {
+  return Math.floor(Math.random() * 6); // Zahl zwischen 0 und 5
+};
+
 const MemoryGame = (props) => {
   const [itemsArray, setItemsArray] = useState(props.config.items);
-  
+  const [colorSetClass, setColorSetClass] = useState(`colorset-${getRandomColorSet()}`);
 
   useEffect(() => {
 
@@ -202,6 +207,7 @@ const MemoryGame = (props) => {
         flipTween(tile, false, true)
       }); 
       shuffle(itemsArray);
+      changeBackgroundColor();
     }
     if (!AUDIOMUTE) soundClick.play();
     if (!AUDIOMUTE) soundBgMusic.play();
@@ -235,9 +241,19 @@ const MemoryGame = (props) => {
     setItemsArray(b);
   }
 
+
+
+  // Funktion, die beim Starten des Spiels die Klasse der Hintergrundfarbe ändert
+  const changeBackgroundColor = () => {
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+      rootElement.classList.remove(...Array.from(rootElement.classList).filter(className => className.startsWith('colorset-')));
+      rootElement.classList.add(colorSetClass);
+    }
+  };
+
   return (
     <div className={`memory-game colorset-${props.colorSet}`} ref={memory}>
-      <div className="shadow"></div>
       <div className="aspect-ratio-box">
         <ul className="grid" style={{ gridTemplateColumns: templateColumnsString }}>
           {itemsArray.map((item, index) => (
