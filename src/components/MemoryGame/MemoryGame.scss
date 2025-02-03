@@ -191,7 +191,7 @@
                                     var(--homegradient-color2) 100%
                     );
 
-  &.colorset-0 {
+  &[data-colorset="0"] {
     --homegradient-color1: rgba(123, 40, 197, 1);
     --homegradient-color2: rgba(69, 28, 105, 1);
 
@@ -200,7 +200,7 @@
     --colorPrimaryDark: #451c69;
   }
 
-  &.colorset-1 {
+  &[data-colorset="1"] {
     --homegradient-color1: rgba(185, 112, 30, 1);
     --homegradient-color2: rgba(173, 98, 24, 1);
 
@@ -209,7 +209,7 @@
     --colorPrimaryDark: rgb(143, 68, 24);
   }
 
-  &.colorset-2 {
+  &[data-colorset="2"] {
     --homegradient-color1: rgba(90, 120, 230, 1);
     --homegradient-color2: rgba(80, 104, 201, 1);
 
@@ -218,7 +218,7 @@
     --colorPrimaryDark: rgb(50, 60, 180);
   }
 
-  &.colorset-3 {
+  &[data-colorset="3"] {
     --homegradient-color1: rgba(20, 111, 86, 1);
     --homegradient-color2: rgba(20, 92, 55, 1);
 
@@ -229,7 +229,7 @@
   }
 
 
-  &.colorset-4 {
+  &[data-colorset="4"] {
     --homegradient-color1: rgba(171, 51, 16, 1);
     --homegradient-color2: rgba(160, 22, 36, 1);
 
@@ -238,7 +238,7 @@
     --colorPrimaryDark: rgb(101, 1, 16);
   }
 
-  &.colorset-5 {
+  &[data-colorset="5"] {
     --homegradient-color1: rgba(40, 160, 135, 1);
     --homegradient-color2: rgba(31, 141, 119, 1);
 

@@ -14,13 +14,17 @@ let _splash: HTMLElement | null, _curtain: HTMLElement | null, _muteButton: HTML
 let soundTick: HTMLAudioElement, soundClick: HTMLAudioElement, soundMatch: HTMLAudioElement, soundNomatch: HTMLAudioElement, soundBgMusic: HTMLAudioElement, soundWin: HTMLAudioElement;
 
 // Funktion zur Generierung einer zufälligen Zahl für die Klasse
-const getRandomColorSet = () => {
-  return Math.floor(Math.random() * 6); // Zahl zwischen 0 und 5
+const getRandomColorSet = (currentSet: number) => {
+  let newSet;
+  do {
+    newSet = Math.floor(Math.random() * 6); // Zahl zwischen 0 und 5
+  } while (newSet === currentSet);
+  return newSet;
 };
 
 const MemoryGame = (props: any) => {
   const [itemsArray, setItemsArray] = useState(props.config.items);
-  const [colorSetClass, setColorSetClass] = useState(`colorset-${getRandomColorSet()}`);
+  const [colorSetClass, setColorSetClass] = useState(`colorset-${getRandomColorSet(-1)}`);
 
   useEffect(() => {
     _allTiles = Array.from(memory.current!.querySelectorAll(".memory-item"));
@@ -79,57 +83,60 @@ const MemoryGame = (props: any) => {
 
   const onOut = (e: any) => {};
 
-  const flipTween = (target: HTMLElement, open = false, unlockAfter = false) => {
-    if (open) target.dataset.open = "true";
+  const flipTween = async (target: HTMLElement, open = false, unlockAfter = false) => {
+    return new Promise<void>((resolve) => {
+      if (open) target.dataset.open = "true";
 
-    target.dataset.animating = "true";
-    gsap.set(target, { perspective: 1500 });
+      target.dataset.animating = "true";
+      gsap.set(target, { perspective: 1500 });
 
-    let time = open ? TRANSITION_TIME_CARDFLIP / 2 : TRANSITION_TIME_CARDFLIP_BACK / 2;
-    let content = target.querySelector(".content") as HTMLElement;
-    let curtainFrontBack = content.querySelectorAll(".content--front .curtain, .content--back .curtain");
-    let curtainLeftRight = content.querySelectorAll(".content--left .curtain, .content--right .curtain");
+      let time = open ? TRANSITION_TIME_CARDFLIP / 2 : TRANSITION_TIME_CARDFLIP_BACK / 2;
+      let content = target.querySelector(".content") as HTMLElement;
+      let curtainFrontBack = content.querySelectorAll(".content--front .curtain, .content--back .curtain");
+      let curtainLeftRight = content.querySelectorAll(".content--left .curtain, .content--right .curtain");
 
-    // flip fore
-    gsap.to(content, { rotationY: 90, duration: time, ease: Quad.easeIn });
-    gsap.to(curtainLeftRight, {
-      opacity: 0,
-      duration: time,
-      ease: Quad.easeIn,
-    });
-    gsap.to(curtainFrontBack, {
-      opacity: 0.8,
-      duration: time,
-      ease: Quart.easeIn,
-      // flip back
-      onComplete: () => {
-        gsap.to(content, { rotationY: open ? 180 : 0, duration: time, ease: Quad.easeOut });
-        gsap.to(curtainLeftRight, {
-          opacity: 0.5,
-          duration: time,
-          ease: Quad.easeOut,
-        });
-        gsap.to(curtainFrontBack, {
-          opacity: 0,
-          duration: time,
-          ease: Quart.easeOut,
-          // adding tile to check for match and reset animation
-          onComplete: () => {
-            setTimeout(() => {
-              if (open) {
-                addTile(target);
-              } else {
-                delete target.dataset.open;
-              }
-              delete target.dataset.animating;
-              if (_valueTiles.length === 1) target.dataset.locked = "true";
-              if (unlockAfter) {
-                delete target.dataset.locked;
-              }
-            }, 500);
-          },
-        });
-      },
+      // flip fore
+      gsap.to(content, { rotationY: 90, duration: time, ease: Quad.easeIn });
+      gsap.to(curtainLeftRight, {
+        opacity: 0,
+        duration: time,
+        ease: Quad.easeIn,
+      });
+      gsap.to(curtainFrontBack, {
+        opacity: 0.8,
+        duration: time,
+        ease: Quart.easeIn,
+        // flip back
+        onComplete: () => {
+          gsap.to(content, { rotationY: open ? 180 : 0, duration: time, ease: Quad.easeOut });
+          gsap.to(curtainLeftRight, {
+            opacity: 0.5,
+            duration: time,
+            ease: Quad.easeOut,
+          });
+          gsap.to(curtainFrontBack, {
+            opacity: 0,
+            duration: time,
+            ease: Quart.easeOut,
+            // adding tile to check for match and reset animation
+            onComplete: () => {
+              setTimeout(() => {
+                if (open) {
+                  addTile(target);
+                } else {
+                  delete target.dataset.open;
+                }
+                delete target.dataset.animating;
+                if (_valueTiles.length === 1) target.dataset.locked = "true";
+                if (unlockAfter) {
+                  delete target.dataset.locked;
+                }
+                resolve();
+              }, 500);
+            },
+          });
+        },
+      });
     });
   };
 
@@ -192,22 +199,25 @@ const MemoryGame = (props: any) => {
     else _allTiles.forEach((tile) => delete tile.dataset.locked);
   };
 
-  const startMemory = () => {
-    if (_splash!.dataset.replay) {
-      _counter.user = 0;
-      _counter.matches = 0;
-      _allTiles.forEach((tile) => {
-        delete tile.dataset.disabled;
-        flipTween(tile, false, true);
-      });
-      shuffle(itemsArray);
-      changeBackgroundColor();
-    }
+  const startMemory = async () => {
+    changeBackgroundColor();
     if (!AUDIOMUTE) soundClick.play();
     if (!AUDIOMUTE) soundBgMusic.play();
     if (!AUDIOMUTE) gsap.to(soundBgMusic, { volume: 0.08, duration: 6 });
     _splash!.classList.remove("visible");
     _curtain!.classList.remove("active");
+
+    if (_splash!.dataset.replay) {
+      _counter.user = 0;
+      _counter.matches = 0;
+      // await bis alle fliptweens zuende sind
+      await Promise.all(_allTiles.map((tile) => {
+        delete tile.dataset.disabled;
+        return flipTween(tile, false, true);
+      }));
+      shuffle(itemsArray);
+    }
+
   };
 
   const toggleMute = () => {
@@ -235,12 +245,13 @@ const MemoryGame = (props: any) => {
     setItemsArray(b);
   }
 
-  // Funktion, die beim Starten des Spiels die Klasse der Hintergrundfarbe ändert
+  // Funktion, die beim Starten des Spiels das data-colorset Attribut ändert
   const changeBackgroundColor = () => {
     const rootElement = document.getElementById('root');
     if (rootElement) {
-      rootElement.classList.remove(...Array.from(rootElement.classList).filter(className => className.startsWith('colorset-')));
-      rootElement.classList.add(colorSetClass);
+      const currentSet = parseInt(rootElement.getAttribute('data-colorset') || '-1', 10);
+      const newSet = getRandomColorSet(currentSet);
+      rootElement.setAttribute('data-colorset', newSet.toString());
     }
   };
 
