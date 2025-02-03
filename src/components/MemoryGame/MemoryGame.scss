@@ -179,8 +179,11 @@
 
 #root {
   $patternColor: 000000;
-  --homegradient-color1: rgba(123, 40, 197, 1);
-  --homegradient-color2: rgba(69, 28, 105, 1);
+  --homegradient-color1: white;
+  --homegradient-color2: white;
+  --colorPrimary: black;
+  --colorPrimaryLight: gray;
+  --colorPrimaryDark: black;
   transition: --homegradient-color1 4400ms, --homegradient-color2 1400ms;
 
   background-image: url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23#{$patternColor}' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E"),
@@ -225,9 +228,7 @@
     --colorPrimary: rgb(20, 111, 86);
     --colorPrimaryLight: rgb(60, 181, 136);
     --colorPrimaryDark: rgb(0, 91, 66);
-
   }
-
 
   &[data-colorset="4"] {
     --homegradient-color1: rgba(171, 51, 16, 1);
@@ -245,6 +246,5 @@
     --colorPrimary: rgb(40, 160, 135);
     --colorPrimaryLight: rgb(90, 220, 185);
     --colorPrimaryDark: rgb(10, 70, 25);
-
   }
 }
