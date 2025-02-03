@@ -200,9 +200,9 @@ const MemoryGame = (props: any) => {
   };
 
   const startMemory = async () => {
-    changeBackgroundColor();
-    if (!AUDIOMUTE) soundClick.play();
-    if (!AUDIOMUTE) soundBgMusic.play();
+
+    if (!AUDIOMUTE) await soundClick.play();
+    if (!AUDIOMUTE) await soundBgMusic.play();
     if (!AUDIOMUTE) gsap.to(soundBgMusic, { volume: 0.08, duration: 6 });
     _splash!.classList.remove("visible");
     _curtain!.classList.remove("active");
@@ -217,7 +217,7 @@ const MemoryGame = (props: any) => {
       }));
       shuffle(itemsArray);
     }
-
+    changeBackgroundColor();
   };
 
   const toggleMute = () => {
