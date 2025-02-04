@@ -1,4 +1,4 @@
-import './App.css';
+import './App.scss';
 import MemoryGame from './components/MemoryGame/MemoryGame';
 
 interface MemoryItem {

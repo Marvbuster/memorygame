@@ -1,0 +1,141 @@
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overscroll-behavior: none;
+}
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+
+@property --homegradient-color1 {
+    syntax: "<color>";
+    initial-value: rgba(0, 212, 255, 1);
+    inherits: true;
+}
+
+@property --homegradient-color2 {
+    syntax: "<color>";
+    initial-value: rgba(41, 41, 186, 1);
+    inherits: true;
+}
+
+:root {
+    --homegradient-color1: rgba(123, 40, 197, 1);
+    --homegradient-color2: rgba(69, 28, 105, 1);
+    --colorPrimary: #7b28c5;
+    --colorPrimaryTap: darken(#7b28c5, 10%);
+    --colorPrimaryLight: #c995f6;
+    --colorPrimaryDark: #451c69;
+}
+
+@function lighten-color($color, $amount) {
+    @return lighten($color, $amount);
+}
+
+#root {
+    position: relative;
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    overflow: hidden;
+
+    padding: 0 1rem;
+
+    $patternColor: 000000;
+    --homegradient-color1: white;
+    --homegradient-color2: white;
+    --colorPrimary: black;
+    --colorPrimaryTap: black;
+    --colorPrimaryLight: gray;
+    --colorPrimaryDark: black;
+    transition: --homegradient-color1 4400ms, --homegradient-color2 1400ms;
+
+    background-image: url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23#{$patternColor}' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E"),
+    radial-gradient(
+        ellipse at -20% -10%,
+        rgba(65, 60, 50, 1) 0%,
+        var(--homegradient-color1) 40%,
+        var(--homegradient-color2) 100%
+    );
+
+    &[data-colorset="0"] {
+        --homegradient-color1: rgba(123, 40, 197, 1);
+        --homegradient-color2: rgba(69, 28, 105, 1);
+
+        --colorPrimary: rgb(123, 40, 197);
+        --colorPrimaryTap: #{lighten-color(rgba(123, 40, 197, 0.5), 10%)};
+        --colorPrimaryLight: #c995f6;
+        --colorPrimaryDark: #451c69;
+    }
+
+    &[data-colorset="1"] {
+        --homegradient-color1: rgba(185, 112, 30, 1);
+        --homegradient-color2: rgba(173, 98, 24, 1);
+
+        --colorPrimary: rgb(185, 112, 30);
+        --colorPrimaryTap: #{lighten-color(rgba(185, 112, 30, 0.5), 10%)};
+        --colorPrimaryLight: rgb(233, 178, 54);
+        --colorPrimaryDark: rgb(143, 68, 24);
+    }
+
+    &[data-colorset="2"] {
+        --homegradient-color1: rgba(90, 120, 230, 1);
+        --homegradient-color2: rgba(80, 104, 201, 1);
+
+        --colorPrimary: rgb(90, 120, 230);
+        --colorPrimaryTap: #{lighten-color(rgba(90, 120, 230, 0.5), 10%)};
+        --colorPrimaryLight: rgb(140, 150, 255);
+        --colorPrimaryDark: rgb(50, 60, 180);
+    }
+
+    &[data-colorset="3"] {
+        --homegradient-color1: rgba(20, 111, 86, 1);
+        --homegradient-color2: rgba(20, 92, 55, 1);
+
+        --colorPrimary: rgb(20, 111, 86);
+        --colorPrimaryTap: #{lighten-color(rgba(20, 111, 86, 0.5), 10%)};
+        --colorPrimaryLight: rgb(60, 181, 136);
+        --colorPrimaryDark: rgb(0, 91, 66);
+    }
+
+    &[data-colorset="4"] {
+        --homegradient-color1: rgba(171, 51, 16, 1);
+        --homegradient-color2: rgba(160, 22, 36, 1);
+
+        --colorPrimary: rgb(171, 51, 16);
+        --colorPrimaryTap: #{lighten-color(rgba(171, 51, 16, 0.5), 10%)};
+        --colorPrimaryLight: rgb(241, 121, 76);
+        --colorPrimaryDark: rgb(101, 1, 16);
+    }
+
+    &[data-colorset="5"] {
+        --homegradient-color1: rgba(40, 160, 135, 1);
+        --homegradient-color2: rgba(31, 141, 119, 1);
+
+        --colorPrimary: rgb(40, 160, 135);
+        --colorPrimaryTap: #{lighten-color(rgba(40, 160, 135, 0.5), 10%)};
+        --colorPrimaryLight: rgb(90, 220, 185);
+        --colorPrimaryDark: rgb(10, 70, 25);
+    }
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: var(--colorPrimaryTap);
+}

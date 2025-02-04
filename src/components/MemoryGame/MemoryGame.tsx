@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import {useEffect, useRef, useState} from "react";
 import "./MemoryGame.scss";
 import MemoryItem from "./MemoryItem";
-import gsap, { Quad, Quart } from "gsap";
+import gsap, {Quad, Quart} from "gsap";
 
 const TRANSITION_TIME_CARDFLIP = 1;
 const TRANSITION_TIME_CARDFLIP_BACK = 0.6;
@@ -11,7 +11,8 @@ let _activeTiles = 0;
 let _valueTiles: HTMLElement[] = [];
 let _allTiles: HTMLElement[] = [];
 let _splash: HTMLElement | null, _curtain: HTMLElement | null, _muteButton: HTMLElement | null, _counter: { user: number; matches: number };
-let soundTick: HTMLAudioElement, soundClick: HTMLAudioElement, soundMatch: HTMLAudioElement, soundNomatch: HTMLAudioElement, soundBgMusic: HTMLAudioElement, soundWin: HTMLAudioElement;
+let soundTick: HTMLAudioElement, soundClick: HTMLAudioElement, soundMatch: HTMLAudioElement, soundNomatch: HTMLAudioElement, soundBgMusic: HTMLAudioElement,
+  soundWin: HTMLAudioElement;
 
 // Funktion zur Generierung einer zufälligen Zahl für die Klasse
 const getRandomColorSet = (currentSet: number) => {
@@ -25,6 +26,7 @@ const getRandomColorSet = (currentSet: number) => {
 const MemoryGame = (props: any) => {
   const [itemsArray, setItemsArray] = useState(props.config.items);
   const [colorSetClass, setColorSetClass] = useState(`colorset-${getRandomColorSet(-1)}`);
+  const [activeItem, setActiveItem] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
     _allTiles = Array.from(memory.current!.querySelectorAll(".memory-item"));
@@ -77,18 +79,57 @@ const MemoryGame = (props: any) => {
     }
   };
 
+  const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    const touch = e.touches[0];
+    const target = document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement;
+    if(!target) {
+      setActiveItem(null);
+      return;
+    }
+    const memoryItem = target.closest(".memory-item") as HTMLElement;
+
+    if (memoryItem && memoryItem !== activeItem) {
+      if (!AUDIOMUTE) soundTick.play();
+      console.log("Touch Move", e, activeItem, memoryItem);
+      memoryItem?.classList.add("touch-active");
+      setActiveItem(null);
+      setActiveItem(memoryItem);
+    } else if (!memoryItem) {
+      activeItem?.classList.remove("touch-active");
+      setActiveItem(null);
+    }
+  };
+
+  const onTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    const touch = e.changedTouches[0];
+    const target = document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement;
+    const memoryItem = target.closest(".memory-item") as HTMLElement;
+    // if (memoryItem && memoryItem !== activeItem) {
+      if (!AUDIOMUTE) soundTick.play();
+      console.log("Touch End ", e, ' MemoryItem =' , memoryItem);
+      memoryItem?.classList.remove("touch-active");
+      setActiveItem(null);
+    // } else if (!memoryItem) {
+    //   activeItem?.classList.remove("touch-active");
+    //   setActiveItem(null);
+    // }
+    // setActiveItem(null);
+    // console.log("Touch End", e);
+  };
+
   const onOver = (e: any) => {
     if (!AUDIOMUTE) soundTick.play();
   };
 
-  const onOut = (e: any) => {};
+  const onOut = (e: any) => {
+  };
 
   const flipTween = async (target: HTMLElement, open = false, unlockAfter = false) => {
     return new Promise<void>((resolve) => {
       if (open) target.dataset.open = "true";
 
       target.dataset.animating = "true";
-      gsap.set(target, { perspective: 1500 });
+      gsap.set(target, {perspective: 1500});
 
       let time = open ? TRANSITION_TIME_CARDFLIP / 2 : TRANSITION_TIME_CARDFLIP_BACK / 2;
       let content = target.querySelector(".content") as HTMLElement;
@@ -96,7 +137,7 @@ const MemoryGame = (props: any) => {
       let curtainLeftRight = content.querySelectorAll(".content--left .curtain, .content--right .curtain");
 
       // flip fore
-      gsap.to(content, { rotationY: 90, duration: time, ease: Quad.easeIn });
+      gsap.to(content, {rotationY: 90, duration: time, ease: Quad.easeIn});
       gsap.to(curtainLeftRight, {
         opacity: 0,
         duration: time,
@@ -108,7 +149,7 @@ const MemoryGame = (props: any) => {
         ease: Quart.easeIn,
         // flip back
         onComplete: () => {
-          gsap.to(content, { rotationY: open ? 180 : 0, duration: time, ease: Quad.easeOut });
+          gsap.to(content, {rotationY: open ? 180 : 0, duration: time, ease: Quad.easeOut});
           gsap.to(curtainLeftRight, {
             opacity: 0.5,
             duration: time,
@@ -203,7 +244,7 @@ const MemoryGame = (props: any) => {
 
     if (!AUDIOMUTE) await soundClick.play();
     if (!AUDIOMUTE) await soundBgMusic.play();
-    if (!AUDIOMUTE) gsap.to(soundBgMusic, { volume: 0.08, duration: 6 });
+    if (!AUDIOMUTE) gsap.to(soundBgMusic, {volume: 0.08, duration: 6});
     _splash!.classList.remove("visible");
     _curtain!.classList.remove("active");
 
@@ -224,12 +265,12 @@ const MemoryGame = (props: any) => {
     soundClick.play();
     if (!AUDIOMUTE) {
       AUDIOMUTE = true;
-      gsap.to(soundBgMusic, { volume: 0, duration: 2, overwrite: true });
+      gsap.to(soundBgMusic, {volume: 0, duration: 2, overwrite: true});
       _muteButton!.classList.add("muted");
     } else {
       AUDIOMUTE = false;
       soundBgMusic.play();
-      gsap.to(soundBgMusic, { volume: 0.08, duration: 6, overwrite: true });
+      gsap.to(soundBgMusic, {volume: 0.08, duration: 6, overwrite: true});
       _muteButton!.classList.remove("muted");
     }
   };
@@ -256,23 +297,26 @@ const MemoryGame = (props: any) => {
   };
 
   return (
-    <div className={`memory-game colorset-${props.colorSet}`} ref={memory}>
+    <div className={`memory-game colorset-${props.colorSet}`} ref={memory} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
       <div className="aspect-ratio-box">
-        <ul className="grid" style={{ gridTemplateColumns: templateColumnsString }}>
+        <ul className="grid" style={{gridTemplateColumns: templateColumnsString}}>
           {itemsArray.map((item: any, index: number) => (
-            <MemoryItem key={item.id} uid={item.id} onClick={onClick} onMouseOver={onOver} onMouseOut={onOut} config={item} />
+            // if setActiveItem is item, add class touch-active
+            <MemoryItem key={item.id} uid={item.id} onClick={onClick} onMouseOver={onOver} onMouseOut={onOut} config={item}
+            />
           ))}
         </ul>
         <div className="splash visible">
-          <h1>Moin!</h1>
-          <p>Lust auf eine Runde Memory?</p>
+          <h1>Memory-Chill</h1>
+          <p>Eine kleine Runde geht doch immer...</p>
           <button onClick={startMemory}>Starten</button>
         </div>
       </div>
       <div className="game-controls">
         <div className="mute" onClick={toggleMute}>
           <svg id="volume" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 576 512">
-            <path d="M301.1 34.8C312.6 40 320 51.4 320 64V448c0 12.6-7.4 24-18.9 29.2s-25 3.1-34.4-5.3L131.8 352H64c-35.3 0-64-28.7-64-64V224c0-35.3 28.7-64 64-64h67.8L266.7 40.1c9.4-8.4 22.9-10.4 34.4-5.3z" />
+            <path
+              d="M301.1 34.8C312.6 40 320 51.4 320 64V448c0 12.6-7.4 24-18.9 29.2s-25 3.1-34.4-5.3L131.8 352H64c-35.3 0-64-28.7-64-64V224c0-35.3 28.7-64 64-64h67.8L266.7 40.1c9.4-8.4 22.9-10.4 34.4-5.3z" />
             <path
               id="x"
               d="M425 167l55 55 55-55c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-55 55 55 55c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-55-55-55 55c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l55-55-55-55c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0z"
