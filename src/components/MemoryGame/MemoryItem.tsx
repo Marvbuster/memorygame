@@ -1,4 +1,5 @@
 import "./MemoryItem.scss";
+import {JSX} from "react";
 
 interface MemoryItemProps {
   uid: any;
@@ -11,7 +12,7 @@ interface MemoryItemProps {
   };
 }
 
-const MemoryItem: React.FC<MemoryItemProps> = (props) => {
+const MemoryItem: (props) => JSX.Element = (props) => {
   return (
     <div
       className="memory-item"
