@@ -21,3 +21,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+/_raw_data/
+
+# lokal, nicht versionieren
+.idea/
+.next/

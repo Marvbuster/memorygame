@@ -1,0 +1,19 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Projektstruktur und Einstiegspunkte
+
+Das Hauptprojekt ist ein Memory-Spiel, entwickelt mit React und TypeScript.
+
+- Der Einstiegspunkt ist [src/App.tsx](mdc:src/App.tsx), wo das Memory-Spiel initialisiert und konfiguriert wird.
+- Die Spiellogik und Darstellung befinden sich in [src/components/MemoryGame/MemoryGame.tsx](mdc:src/components/MemoryGame/MemoryGame.tsx).
+- Einzelne Memory-Karten werden durch [src/components/MemoryGame/MemoryItem.tsx](mdc:src/components/MemoryGame/MemoryItem.tsx) repräsentiert.
+- Bilder für die Karten liegen im Verzeichnis [public/images/](mdc:public/images).
+- Soundeffekte und Musik befinden sich in [public/sounds/](mdc:public/sounds).
+- Das Styling erfolgt über SCSS-Dateien in den jeweiligen Komponentenordnern.
+
+Die Konfiguration der Memory-Karten (z.B. Motive, Spielfeldgröße) erfolgt direkt in [src/App.tsx](mdc:src/App.tsx).
+
+Das Projekt verwendet Animationen (GSAP) und Soundeffekte für ein verbessertes Spielerlebnis.
